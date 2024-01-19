@@ -14,8 +14,11 @@ export const ConfigProvider = ({ children }) => {
                 setConfig(configData);
                 setLoading(false);
             })
-            .catch((error) => {
-                console.error("Failed to load configuration", error);
+            .catch(() => {
+                setConfig({
+                    "BASE_URL": "http://localhost:8090",
+                    "PREPROCESS_BASE_URL": "http://localhost:8000",
+                });
                 setLoading(false);
             });
     }, []);
