@@ -1,0 +1,27 @@
+.metadataContainer {
+  .mb1 {
+    margin-bottom: 8px;
+  }
+  .mb2 {
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .title {
+    color: #545b64;
+  }
+
+  input {
+    border: none;
+    border-bottom: 1px solid #dfd9fc;
+    //border-radius: 8px;
+    outline: none;
+    background-color: transparent;
+    margin-left: 4px;
+    padding: 4px 0 4px 4px;
+
+    &::placeholder {
+      font-size: 12px;
+    }
+  }
+}

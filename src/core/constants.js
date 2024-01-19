@@ -1,0 +1,11 @@
+export const LOGNAMES = "/lognames";
+export const EVENT_TYPES = "/eventTypes";
+export const METADATA = "/metadata";
+export const STATS = "/stats";
+export const DETECTION = "/detection";
+export const EXPLORE = "/explore";
+export const REFRESH_DATA = "/refreshData";
+export const PROCESSES = "/process";
+export const PREPROCESSES = "/preprocess";
+export const FILE_UPLOAD = "/upload";
+export const SETTING_VARS = "/setting_vars";

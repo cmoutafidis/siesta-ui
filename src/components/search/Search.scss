@@ -1,0 +1,81 @@
+.search {
+  padding: 3px;
+
+  .filterItem {
+    background: #ece8ff;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    font-size: 16px;
+  }
+
+  .firstOr {
+    border-radius: 16px 0 0 16px;
+    margin-right: 4px;
+  }
+
+  .midOr {
+    border-radius: 0 0 0 0;
+    margin-right: 4px;
+  }
+
+  .lastOr {
+    border-radius: 0 16px 16px 0;
+  }
+
+  .searchIcon {
+    cursor: pointer;
+    margin-right: 8px;
+  }
+
+  .searchWrapper {
+    position: relative;
+    margin: 8px 0;
+
+    input {
+      border: none;
+      border-bottom: 1px solid #dfd9fc;
+      //border-radius: 8px;
+      outline: none;
+      background-color: transparent;
+      margin-left: 4px;
+      padding: 4px 0 4px 4px;
+
+      &::placeholder {
+        font-size: 12px;
+      }
+    }
+  }
+
+  .mr1 {
+    margin-right: 8px;
+  }
+
+  .mb1 {
+    margin-bottom: 8px;
+  }
+}
+
+.zIndex {
+  z-index: 1;
+}
+
+.eventList {
+  min-width: 100px;
+  border: 1px solid #D3DAE6;
+  border-radius: 4px;
+  background: white;
+  max-height: 300px;
+  overflow-y: scroll;
+
+  .eventItem {
+    padding: 2px 4px 2px;
+
+    &:hover {
+      background-color: #ece8ff;
+    }
+  }
+
+  .eventSelectedItem {
+    background-color: #dfd9fc;
+  }
+}

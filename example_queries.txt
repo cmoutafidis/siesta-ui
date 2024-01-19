@@ -1,0 +1,200 @@
+GET /lognames  (return the different indexed log files)
+Response: [
+  "synthetic",
+  "test",
+  "synthetic_pos",
+  "test_pos"
+]
+
+POST /eventTypes (return the different events for a specific event type)
+Query: {
+  "log_name": "test"
+}
+Response: [
+  "A",
+  "D",
+  "B",
+  "C"
+]
+
+GET /refreshData (ta lognames kai ta evenTypes einai prefetched, an proste8ei neo logfile h periodika mporeis na xtypas ayto to endpoint gia na ta 3anafetcharei - h otan kanei prwth fora load)
+Response 200
+
+
+POST /metadata (return metadata info for a specific log file)
+Query: {
+  "log_name": "test"
+}
+-: indexing parameters
++: index metadata
+Response: {
+  "compression": "snappy",-
+  "events": 23,+
+  "filename": "experiments/input/test.withTimestamp",
+  "has_previous_stored": true,-
+  "last_interval": "2020-08-15 07:56:42.0_2020-09-14 07:56:42.0",
+  "logname": "test",
+  "lookback": 30,-
+  "mode": "timestamps",-
+  "pairs": 35,+
+  "split_every_days": 30,-
+  "traces": 4+
+}
+
+POST /stats (return basic statistics for each consecutive pair e.g. ABC -> AB and BC) to traceID einai place holder apla valto 0
+Query:{
+  "log_name": "test",
+  "pattern": {
+    "events": [
+      {
+        "name": "A",
+        "position": 0,
+        "traceID": 0
+      },
+      {
+        "name": "B",
+        "position": 1,
+        "traceID": 0
+      },
+      {
+        "name": "C",
+        "position": 2,
+        "traceID": 0
+      }
+    ]
+  }
+}
+Response:
+{
+  "counts": [
+    {
+      "eventA": "A",
+      "eventB": "B",
+      "sum_duration": 37800,
+      "count": 5,
+      "min_duration": 19800,
+      "max_duration": 19800
+    },
+    {
+      "eventA": "B",
+      "eventB": "C",
+      "sum_duration": 46800,
+      "count": 5,
+      "min_duration": 18000,
+      "max_duration": 18000
+    }
+  ]
+}
+
+
+From
+till
+pattern_constrains
+returnAll
+--
+groups
+wnm
+POST /detection (vriskei ta traces poy periexoyn to pattern)
+Query: {
+  "from": 1650955069, date + time
+  "groups-config": {
+    "groups": "[(1-5,7),(2-8,8-12)]" string
+  },
+  "hasGroups": true,
+  "log_name": "test",
+  "pattern": {"eventsWithSymbols": [{"name": "wsoc", "position": 0, "symbol": "_"}, {"name": "atwq", "position": 1, "symbol": "_"}], "constraints": [{"posA": 0, "posB": 1, "type": "within/atleast", "constraint_type": "timeConstraint/gapConstraint", "constraint": 15106ms}]},
+  "returnAll": true, flag
+  "till": 1650955069, date + time
+  "whyNotMatchFlag": true,
+  "wnm-config": {
+    "granularityK": "seconds/minutes/hours",
+    "granularityUncertainty": "seconds/minutes/hours",
+    "k": 2,
+    "uncertaintyPerEvent": 5
+  }
+}
+Response: {"occurrences":[{"traceID":44368,"occurrences":[{"occurrence":[{"name":"wsoc","position":0,"timestamp":"2022-01-05 10:30:05.00"},{"name":"atwq","position":1,"timestamp":"2022-01-05 10:52:05.00"}]}]},{"traceID":44682,"occurrences":[{"occurrence":[{"name":"wsoc","position":0,"timestamp":"2022-01-05 05:01:55.00"},{"name":"atwq","position":1,"timestamp":"2022-01-05 08:18:10.00"}]}]},{"traceID":24352,"occurrences":[{"occurrence":[{"name":"wsoc","position":0,"timestamp":"2022-01-03 02:49:04.00"},{"name":"atwq","position":1,"timestamp":"2022-01-03 05:58:25.00"}]}]},{"traceID":58382,"occurrences":[{"occurrence":[{"name":"wsoc","position":1,"timestamp":"2022-01-07 15:47:14.00"},{"name":"atwq","position":2,"timestamp":"2022-01-07 18:58:25.00"}]}]}],"timeStats":{"time for pruning in ms":4714,"time for validation in ms":575,"response time in ms":5289}}
+
+POST /explore (vriskei pi8ana epomena me 3 texnikes fast/accurate/hybrid)
+Query: {
+  "log_name": "test",
+  "mode": "accurate",
+  "pattern": {
+    "events": [
+      {
+        "name": "A",
+        "position": 0,
+        "traceID": 0
+      },
+      {
+        "name": "B",
+        "position": 1,
+        "traceID": 0
+      }
+    ]
+  }
+}
+Response: {"propositions":[{"event":"C","completions":4,"averageDuration":18900.0},{"event":"A","completions":1,"averageDuration":7200.0}]}
+
+(an 8esei to mode se hybrid mporei na 8esei kai to k)
+Query: {
+  "k":1,
+  "log_name": "test",
+  "logname": "test",
+  "mode": "hybrid",
+  "pattern": {
+    "events": [
+      {
+        "name": "A",
+        "position": 0,
+        "traceID": 0
+      },
+      {
+        "name": "B",
+        "position": 1,
+        "traceID": 0
+      }
+    ]
+  }
+}
+Response: {"propositions":[{"event":"C","completions":4,"averageDuration":18900.0}]}
+
+
+---------
+result tabs
+preprocesses page
+create new preprocess
+/upload
+/set|get-variables
+/preprocess
+
+database for preprocesses
+get processes list endpoint
+
+exploration
+
+
+{
+  "spark_master": "local[*]", //string
+  "database": "s3", //hide
+  "mode": "positions/timestamps", //switch/dropdown
+  "system": "siesta", //hide
+  "compression": "snappy", //hide
+  "spark_parameters": "", //string
+  "file": "", //hide
+  "logname": "", //select or create
+  "delete_all": false, //only if new logname
+  "delete_prev": false, //only if new logname
+  "split_every_days": 30, //only if new logname
+  "lookback": 30 //only if new logname
+}
+
+
+time stats fix
+title index
+remove navigation
+download table + {occurrences: {0: []}}
+
+detection not found
+pending for continue search
+detection -> position or timestamp

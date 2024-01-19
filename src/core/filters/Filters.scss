@@ -1,0 +1,41 @@
+.filterContainer {
+  padding-bottom: 40px;
+  .mt1 {
+    margin-top: 8px;
+  }
+  .mb1 {
+    margin-bottom: 8px;
+  }
+  .mb2 {
+    margin-bottom: 12px;
+  }
+
+  .title {
+    color: #545b64;
+    font-weight: 700;
+  }
+
+  .date-time-picker {
+    width: 70%;
+    .Mui-error {
+      color: rgba(0, 0, 0, 0.6);
+
+      .MuiOutlinedInput-notchedOutline {
+        border-color: rgba(0, 0, 0, 0.23);
+      }
+    }
+  }
+
+  .addButton {
+    color: rgba(0, 0, 0, 0.87);
+    border-color: rgba(0, 0, 0, 0.23);
+  }
+
+  .select {
+    min-width: 150px;
+  }
+}
+
+.red-border {
+  border: 1px solid red;
+}

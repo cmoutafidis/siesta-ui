@@ -1,0 +1,18 @@
+.list {
+  display: flex;
+  width: 100%;
+
+  .homeContainer {
+    flex: 6;
+
+    .children {
+      position: relative;
+      padding: 20px;
+      padding-right: 40px;
+
+      .listContainer {
+        margin-bottom: 32px;
+      }
+    }
+  }
+}

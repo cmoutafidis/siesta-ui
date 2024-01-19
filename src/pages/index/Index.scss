@@ -1,0 +1,37 @@
+.list {
+  display: flex;
+
+  .homeContainer {
+    flex: 6;
+
+    .children {
+
+      .drawerTrigger {
+        position: absolute;
+        right: 0;
+        top: 20px;
+        padding-top: 5px;
+        padding-left: 4px;
+        background: #dfd9fc;
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: 16px;
+
+        .drawerIcon {
+          cursor: pointer;
+        }
+      }
+
+      .listContainer {
+        -webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.47);
+        box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.47);
+        padding: 20px;
+
+        .listTitle {
+          font-weight: 500;
+          color: gray;
+          margin-bottom: 15px;
+        }
+      }
+    }
+  }
+}
