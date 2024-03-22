@@ -134,12 +134,11 @@ const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => 
         setOrderBy(property);
     };
 
-    const handleChange = (event) => {
-        let newValue = parseInt(event.target.value) + page * rowsPerPage;
-        if (newValue === selectedValue) {
-            newValue = undefined;
+    const handleChange = (event, id) => {
+        if (id === selectedValue) {
+            setSelectedValue(undefined);
         }
-        setSelectedValue(newValue);
+        setSelectedValue(id);
     };
 
     const handleChangePage = (event, newPage) => {
@@ -267,8 +266,8 @@ const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => 
                                             >
                                                 <TableCell padding="checkbox">
                                                     <Radio
-                                                        checked={selectedValue === index + (page * rowsPerPage)}
-                                                        onClick={(e) => handleChange(e, page * rowsPerPage)}
+                                                        checked={selectedValue === row.id}
+                                                        onClick={(e) => handleChange(e, row.id)}
                                                         value={index}
                                                         name="radio-buttons"
                                                     />
@@ -326,7 +325,7 @@ const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => 
                                 >
                                     <TableHead>
                                         <TableRow>
-                                            {detection[selectedValue].occurrences[0].occurrence.map((occurence, index) => (
+                                            {detection.find((occurance) => occurance?.traceID === selectedValue).occurrences[0].occurrence.map((occurence, index) => (
                                                 <TableCell
                                                     key={index}
                                                     padding={'normal'}
@@ -337,7 +336,7 @@ const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => 
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                        {detection[selectedValue].occurrences.map((occurrences, index) => {
+                                        {detection.find((occurance) => occurance?.traceID === selectedValue).occurrences.map((occurrences, index) => {
                                             return (
                                                 <TableRow
                                                     hover
