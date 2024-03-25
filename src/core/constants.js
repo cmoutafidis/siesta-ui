@@ -9,3 +9,7 @@ export const PROCESSES = "/process";
 export const PREPROCESSES = "/preprocess";
 export const FILE_UPLOAD = "/upload";
 export const SETTING_VARS = "/setting_vars";
+export const DECLARE = "/declare/";
+export const POSITIONS = "positions/";
+export const EXISTENCES = "existences/";
+export const ORDERED_RELATIONS = "ordered-relations/";

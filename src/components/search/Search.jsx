@@ -2,15 +2,19 @@ import React, {useEffect, useMemo, useRef, useState} from "react";
 import "./Search.scss";
 import {
     Box,
+    Checkbox,
     Chip,
     CircularProgress,
     FormControl,
     Grid,
+    Input,
     InputLabel,
     MenuItem,
     Popper,
     Select,
-    Tab
+    Slider,
+    Tab,
+    Typography
 } from "@mui/material";
 import clsx from "clsx";
 import DrawerComponent from "../drawer/DrawerComponent";
@@ -21,6 +25,8 @@ import {useDetection} from "../../services/endpoints/detection";
 import {TabContext, TabList, TabPanel} from "@mui/lab";
 import Metadata from "../../core/metadata/Metadata";
 import {useExplore} from "../../services/endpoints/explore";
+import ModesTable from "../result/ModesTable";
+import {useModes} from "../../services/endpoints/modes";
 
 const Search = ({events, indexId, metadata, onStatsResult, onLoadingStats, onDetectionResult, onLoadingDetection, onDetectionError, onTimeoutError, onExploreResult, onExploreLoading, onTabValueChange, onCriteriaChange, onCriteriaChange2, onWnmChange}) => {
 
@@ -48,8 +54,22 @@ const Search = ({events, indexId, metadata, onStatsResult, onLoadingStats, onDet
     const [mode, setMode] = useState("");
     const [k, setK] = useState(1);
     const [orEventList, setOrEventList] = useState([]);
+    const [modesFilterObject, setModesFiltersObject] = useState({
+        support: "0.9",
+        positionsTemplates: [],
+        existencesTemplates: [],
+        orderedTemplates: [],
+        orderedAlternateTemplates: [],
+        orderedChainTemplates: [],
+    });
+    const [allChecked, setAllChecked] = useState({
+        positions: false,
+        existences: false,
+        ordered: false
+    });
     const {getStats, stats, loadingStats, resetStatsState} = useStats();
     const {getDetection, detection, loadingDetection, detectionError, timeoutError, resetDetectionState} = useDetection();
+    const {getModes, positionPatterns, existencePatterns, orderedRelations, orderedRelationsAlternate, orderedRelationsChain, loadingModes, resetModesState} = useModes();
     const {getExplore, explore, loadingExplore} = useExplore();
 
     const symbols = [
@@ -68,9 +88,28 @@ const Search = ({events, indexId, metadata, onStatsResult, onLoadingStats, onDet
         return events.filter((item) => item.toLowerCase().includes(inputValue ? inputValue.toLowerCase() : "")).filter((item) => !orEventList.includes(item));
     }, [events, inputValue, orEventList]);
 
+    const allModesSelected = useMemo(() => {
+        return (modesFilterObject.orderedTemplates.length ? 1 : 0) + (modesFilterObject.orderedAlternateTemplates.length ? 1 : 0) + (modesFilterObject.orderedChainTemplates.length ? 1 : 0) > 1;
+    }, [modesFilterObject]);
+
+    const disableModesButton = useMemo(() => {
+        return modesFilterObject.positionsTemplates.length + modesFilterObject.existencesTemplates.length + modesFilterObject.orderedTemplates.length + modesFilterObject.orderedAlternateTemplates.length + modesFilterObject.orderedChainTemplates.length  === 0;
+    }, [modesFilterObject]);
+
+    const modes = useMemo(() => {
+        return {
+            "position patterns": positionPatterns,
+            "existence patterns": existencePatterns,
+            "ordered relations": orderedRelations,
+            "ordered relations alternate": orderedRelationsAlternate,
+            "ordered relations chain": orderedRelationsChain,
+        };
+    }, [positionPatterns, existencePatterns, orderedRelations, orderedRelationsAlternate, orderedRelationsChain]);
+
     useEffect(() => {
         resetStatsState();
         resetDetectionState();
+        resetModesState();
         setCriteria([]);
         setCriteria2([]);
         setMode("");
@@ -83,7 +122,20 @@ const Search = ({events, indexId, metadata, onStatsResult, onLoadingStats, onDet
         setGroups(null);
         setWnm(null);
         setTabValue("1");
-    }, [indexId, resetDetectionState, resetStatsState]);
+        setModesFiltersObject({
+            support: "0.9",
+            positionsTemplates: [],
+            existencesTemplates: [],
+            orderedTemplates: [],
+            orderedAlternateTemplates: [],
+            orderedChainTemplates: [],
+        });
+        setAllChecked({
+            positions: false,
+            existences: false,
+            ordered: false
+        });
+    }, [indexId, resetDetectionState, resetModesState, resetStatsState]);
 
     useEffect(() => {
         onStatsResult(stats);
@@ -319,6 +371,190 @@ const Search = ({events, indexId, metadata, onStatsResult, onLoadingStats, onDet
         }
     };
 
+    const handleModeFiltersChange = (key, value) => {
+        const newState = {
+            ...modesFilterObject,
+            [key]: value
+        };
+        setModesFiltersObject(newState);
+
+        let positionsCheck = newState.positionsTemplates.length === 2;
+        let existencesCheck = newState.existencesTemplates.length === 8;
+        let orderedCheck = newState.orderedTemplates.length + newState.orderedAlternateTemplates.length + newState.orderedChainTemplates.length === 11;
+
+        setAllChecked({
+            positions: positionsCheck,
+            existences: existencesCheck,
+            ordered: orderedCheck
+        });
+    }
+
+    const onSliderSupportChange = (event, newValue) => {
+        setModesFiltersObject({
+            ...modesFilterObject,
+            support: newValue.toFixed(2).toString()
+        });
+    };
+
+    const onSupportChange = (event) => {
+        let finalValue = parseFloat(event.target.value);
+
+        if (!event.nativeEvent.inputType) {
+            let value;
+            if (modesFilterObject.support === "") {
+                if (parseFloat(event.target.value) > 0) {
+                    value = "0.10";
+                } else {
+                    value = "0.00";
+                }
+                setModesFiltersObject({
+                    ...modesFilterObject,
+                    support: value
+                });
+                return;
+            } else if (parseFloat(event.target.value) - parseFloat(modesFilterObject.support) > 0) {
+                value = 0.1;
+            } else {
+                value = -0.1;
+            }
+
+            finalValue = ((parseFloat(modesFilterObject.support) + value).toFixed(2));
+        }
+
+        if (!isNaN(finalValue)) {
+            if (finalValue > 1.00) {
+                finalValue = "1.00";
+            } else if (finalValue < 0) {
+                finalValue = "0.00";
+            }
+        } else {
+            finalValue = event.target.value;
+        }
+
+        setModesFiltersObject({
+            ...modesFilterObject,
+            support: finalValue.toString()
+        });
+    }
+
+    const handleAllChecked = (key, checked) => {
+        switch (key) {
+            case "positions":
+                if (checked) {
+                    setModesFiltersObject({
+                        ...modesFilterObject,
+                        positionsTemplates: ["first", "last"]
+                    });
+                } else {
+                    setModesFiltersObject({
+                        ...modesFilterObject,
+                        positionsTemplates: []
+                    });
+                }
+                break;
+            case "existences":
+                if (checked) {
+                    setModesFiltersObject({
+                        ...modesFilterObject,
+                        existencesTemplates: [
+                            "existence",
+                            "absence",
+                            "exactly",
+                            "co-existence",
+                            "not co-existence",
+                            "choice",
+                            "exclusive choice",
+                            "responded existence"
+                        ]
+                    });
+                } else {
+                    setModesFiltersObject({
+                        ...modesFilterObject,
+                        existencesTemplates: []
+                    });
+                }
+                break;
+            case "ordered":
+                if (checked) {
+                    setModesFiltersObject({
+                        ...modesFilterObject,
+                        orderedTemplates: [
+                            "response",
+                            "precedence",
+                            "succession",
+                            "notSuccession"
+                        ],
+                        orderedAlternateTemplates: [
+                            "response",
+                            "precedence",
+                            "succession",
+                        ],
+                        orderedChainTemplates: [
+                            "response",
+                            "precedence",
+                            "succession",
+                            "notSuccession"
+                        ],
+                    });
+                } else {
+                    setModesFiltersObject({
+                        ...modesFilterObject,
+                        orderedTemplates: [],
+                        orderedAlternateTemplates: [],
+                        orderedChainTemplates: [],
+                    });
+                }
+                break;
+            default:
+                break;
+        }
+        setAllChecked({...allChecked, [key]: checked})
+    };
+
+    const getGroupCheckbox = (key, len) => {
+        let counter = 0;
+
+        Object.keys(modesFilterObject).forEach((item) => {
+            if (item.startsWith(key)) {
+                counter += modesFilterObject[item].length;
+            }
+        });
+
+        return (
+            <Grid
+                item
+                className="inline-block"
+            >
+                <Checkbox
+                    checked={allChecked[key]}
+                    indeterminate={counter < len && counter > 0}
+                    onChange={(event, checked) => handleAllChecked(key, checked)}
+                    inputProps={{ 'aria-label': 'controlled' }}
+                />
+            </Grid>
+        );
+    }
+
+    const getListCheckbox = (key, value, label) => {
+        const keyChecked = modesFilterObject[key].includes(value);
+        const checked = !!keyChecked;
+
+        return (
+            <Grid item>
+                <Checkbox
+                    checked={checked}
+                    onChange={() => handleModeFiltersChange(key, modesFilterObject[key].includes(value) ? modesFilterObject[key].filter(i => i !== value) : modesFilterObject[key].concat(value))}
+                    inputProps={{ 'aria-label': 'controlled' }}
+                />
+                <span>{label ? label : value}</span>
+            </Grid>
+        );
+    }
+
+    const handleGetModes = () => {
+        getModes(indexId, modesFilterObject, allModesSelected);
+    }
+
     useEffect(() => {
         const granularityMap = {
             "seconds": "s",
@@ -406,6 +642,7 @@ const Search = ({events, indexId, metadata, onStatsResult, onLoadingStats, onDet
                         <Tab label="Metadata" value="1" />
                         <Tab label="Search" value="2" />
                         <Tab label="Explore" value="3" />
+                        <Tab label="Mining Constraint" value="4" />
                     </TabList>
                 </Box>
                 <TabPanel value="1">
@@ -671,6 +908,147 @@ const Search = ({events, indexId, metadata, onStatsResult, onLoadingStats, onDet
                             </Grid>
                         </Grid>
                     </Grid>
+                </TabPanel>
+
+                <TabPanel value="4">
+                    {loadingDetection ? (
+                        <CircularProgress />
+                    ) : (
+                        <Grid
+                            container
+                            direction={"column"}
+                            spacing={1}
+                        >
+                            <Grid item>
+                                <span>{"Support"}</span>
+                            </Grid>
+
+                            <Grid
+                                item
+                                container
+                                spacing={1}
+                            >
+                                <Grid
+                                    item
+                                    className="slider-width"
+                                >
+                                    <Slider
+                                        value={modesFilterObject.support ? parseFloat(modesFilterObject.support) : 0}
+                                        onChange={onSliderSupportChange}
+                                        aria-labelledby="input-slider"
+                                        min={0}
+                                        max={1}
+                                        step={0.1}
+                                    />
+                                </Grid>
+
+                                <Grid item>
+                                    <Input
+                                        value={modesFilterObject.support}
+                                        size="small"
+                                        onChange={onSupportChange}
+                                        className="slider-input-width"
+                                        inputProps={{
+                                            step: 0.1,
+                                            min: 0,
+                                            max: 1,
+                                            type: 'number',
+                                            'aria-labelledby': 'input-slider',
+                                        }}
+                                        placeholder={"0.5"}
+                                    />
+                                </Grid>
+                            </Grid>
+
+                            <Grid item>
+                                &nbsp;
+                            </Grid>
+
+                            <Grid item>
+                                <Grid
+                                    container
+                                    spacing={1}
+                                >
+                                    <Grid item>
+                                        <Typography variant={"subtitle1"}>
+                                            {getGroupCheckbox("positions", 2)}
+                                            {"Positions"}
+                                        </Typography>
+                                        {getListCheckbox("positionsTemplates", "first", "init")}
+                                        {getListCheckbox("positionsTemplates", "last")}
+                                    </Grid>
+
+                                    <Grid item>
+                                        <Typography variant={"subtitle1"}>
+                                            {getGroupCheckbox("existences", 8)}
+                                            {"Existences"}
+                                        </Typography>
+                                        {getListCheckbox("existencesTemplates", "existence")}
+                                        {getListCheckbox("existencesTemplates", "absence")}
+                                        {getListCheckbox("existencesTemplates", "exactly")}
+                                        {getListCheckbox("existencesTemplates", "co-existence")}
+                                        {getListCheckbox("existencesTemplates", "not co-existence")}
+                                        {getListCheckbox("existencesTemplates", "choice")}
+                                        {getListCheckbox("existencesTemplates", "exclusive choice")}
+                                        {getListCheckbox("existencesTemplates", "responded existence")}
+                                    </Grid>
+
+                                    <Grid item>
+                                        <Typography variant={"subtitle1"}>
+                                            {getGroupCheckbox("ordered", 11)}
+                                            {"Ordered"}
+                                        </Typography>
+
+                                        <Grid
+                                            container
+                                            className={"width-unset"}
+                                        >
+                                            <Grid item>
+                                                {getListCheckbox("orderedTemplates", "response")}
+                                                {getListCheckbox("orderedTemplates", "precedence")}
+                                                {getListCheckbox("orderedTemplates", "succession")}
+                                                {getListCheckbox("orderedTemplates", "notSuccession", "not succession")}
+                                            </Grid>
+
+                                            <Grid item>
+                                                {getListCheckbox("orderedAlternateTemplates", "response", "alternate response")}
+                                                {getListCheckbox("orderedAlternateTemplates", "precedence", "alternate precedence")}
+                                                {getListCheckbox("orderedAlternateTemplates", "succession", "alternate succession")}
+                                            </Grid>
+
+                                            <Grid item>
+                                                {getListCheckbox("orderedChainTemplates", "response", "chain response")}
+                                                {getListCheckbox("orderedChainTemplates", "precedence", "chain precedence")}
+                                                {getListCheckbox("orderedChainTemplates", "succession", "chain succession")}
+                                                {getListCheckbox("orderedChainTemplates", "notSuccession", "not chain succession")}
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+                            <Grid item>
+                                <Chip
+                                    label={"Submit Query"}
+                                    clickable={criteria.length > 1}
+                                    onClick={handleGetModes}
+                                    disabled={disableModesButton}
+                                />
+                            </Grid>
+
+                            {(modes["position patterns"] || modes["existence patterns"] || modes["ordered relations"] || modes["ordered relations alternate"] ||modes["ordered relations chain"] || loadingModes) && (
+                                <Grid item>
+                                    {loadingModes ? (
+                                        <CircularProgress />
+                                    ) : (
+                                        <ModesTable
+                                            modes={modes}
+                                        />
+                                    )}
+                                </Grid>
+                            )}
+                        </Grid>
+                    )}
                 </TabPanel>
             </TabContext>
         </Grid>

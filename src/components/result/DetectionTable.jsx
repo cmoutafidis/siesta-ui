@@ -121,7 +121,7 @@ const EnhancedTableHead = (props) => {
 const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => {
 
     const {indexId} = useParams();
-    const [detectionRows, setDetectionRow] = useState([]);
+    const [detectionRows, setDetectionRows] = useState([]);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [page, setPage] = useState(0);
     const [selectedValue, setSelectedValue] = useState(undefined);
@@ -196,7 +196,7 @@ const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => 
             rows.push(createData(occurrence[(isTrace ? "traceID" : "Group ID")], pattern, occurrence?.occurrences?.length, JSON.stringify(occurrences)));
         });
 
-        setDetectionRow(rows);
+        setDetectionRows(rows);
     }, [detection]);
 
     return (
