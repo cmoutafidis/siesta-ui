@@ -413,9 +413,9 @@ const Search = ({events, indexId, metadata, onStatsResult, onLoadingStats, onDet
                 });
                 return;
             } else if (parseFloat(event.target.value) - parseFloat(modesFilterObject.support) > 0) {
-                value = 0.1;
+                value = 0.01;
             } else {
-                value = -0.1;
+                value = -0.01;
             }
 
             finalValue = ((parseFloat(modesFilterObject.support) + value).toFixed(2));
@@ -938,7 +938,7 @@ const Search = ({events, indexId, metadata, onStatsResult, onLoadingStats, onDet
                                         aria-labelledby="input-slider"
                                         min={0}
                                         max={1}
-                                        step={0.1}
+                                        step={0.01}
                                     />
                                 </Grid>
 
