@@ -569,6 +569,7 @@ const Preprocessing = () => {
             <Grid className="listContainer">
                 <Grid
                     container
+                    item
                     alignItems={"baseline"}
                     spacing={1}
                 >
@@ -606,6 +607,13 @@ const Preprocessing = () => {
                     loading={loading}
                     onSelect={handleSelect}
                 />
+            </Grid>
+
+            <Grid
+                item
+                style={{"width": "100%"}}
+            >
+
             </Grid>
 
             {selectedProcess && (

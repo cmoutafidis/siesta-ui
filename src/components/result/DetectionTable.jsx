@@ -161,7 +161,7 @@ const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => 
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - detectionRows.length) : 0;
 
     const csvData = useMemo(() => {
-        const isTrace = !!detection[0]?.traceID;
+        const isTrace = !!detection?.at(0)?.traceID;
         return [
             [isTrace ? "Trace ID" : "Group ID", "Detected Pattern", "Occurrences Length", "Occurrences"],
             ...detectionRows.map(({ id, detectedPattern, occurrencesLength, occurrences }) => [
@@ -175,7 +175,7 @@ const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => 
 
     useEffect(() => {
         const rows = [];
-        const isTrace = detection[0]?.traceID !== undefined;
+        const isTrace = detection?.at(0)?.traceID !== undefined;
         if (!isTrace) {
             headCells[0].label = "Group ID";
         } else {
@@ -211,7 +211,7 @@ const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => 
                     >
                     {detectionError && (
                         <>
-                            {detectionError["Constraints between events that cannot been fulfilled"].map((constraint, index) => (
+                            {detectionError["Constraints between events that cannot been fulfilled"]?.map((constraint, index) => (
                                 <Grid
                                     item
                                     key={index}
@@ -219,7 +219,7 @@ const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => 
                                     <Alert className={"alert"} severity="error">{`Constraint '${constraint.constraint.method} ${constraint.constraint.constraint} ${constraint.constraint.granularity}' between events ${constraint.eventA.name} and ${constraint.eventB.name} cannot be fulfilled`}</Alert>
                                 </Grid>
                             ))}
-                            {detectionError["Pair of events that do not exist"].map((constraint, index) => (
+                            {detectionError["Pair of events that do not exist"]?.map((constraint, index) => (
                                 <Grid
                                     item
                                     key={index}
@@ -227,6 +227,11 @@ const DetectionTable = ({detection, detectionError, timeoutError, criteria}) => 
                                     <Alert className={"alert"} severity="error">{`Event ${constraint.eventA.name} never occurred before Event ${constraint.eventB.name} in this log.`}</Alert>
                                 </Grid>
                             ))}
+                            {detectionError?.status === 500 && (
+                                <Grid item>
+                                    <Alert className={"alert"} severity="error">{`Response code: ` + detectionError?.status}</Alert>
+                                </Grid>
+                            )}
                         </>
                     )}
 
