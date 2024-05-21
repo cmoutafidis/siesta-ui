@@ -73,7 +73,7 @@ export const useModes = () => {
             }
 
             if (modesFilterObject.existencesTemplates.length > 0) {
-                const modesParam = modesFilterObject?.existencesTemplates.join(",").replace(" ", "-");
+                const modesParam = modesFilterObject?.existencesTemplates.join(",").replaceAll(" ", "-");
                 axios.get(config.BASE_URL + DECLARE + EXISTENCES,{params: {...params, modes: modesParam}}).then((response) => response.data).then((resp) => {
                     setLoadingModes(false);
                     setExistencePatterns(resp);
